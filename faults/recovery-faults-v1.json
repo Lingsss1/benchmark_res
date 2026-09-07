@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "catalog_id": "recevobench-recovery-faults-v1",
+  "faults": [
+    {
+      "fault_id": "ranking_signal_inverted",
+      "family": "objective_direction",
+      "title": "Invert the complete ranking signal",
+      "task_types": ["sequential_next_item_ranking", "multi_behavior_purchase_ranking"],
+      "target_file": "model.py",
+      "find": "return math.log1p(popularity) + 2.0 * math.log1p(transition)",
+      "replace": "return -(math.log1p(popularity) + 2.0 * math.log1p(transition))"
+    },
+    {
+      "fault_id": "transition_signal_inverted",
+      "family": "sequence_modeling",
+      "title": "Reverse the sequential transition contribution",
+      "task_types": ["sequential_next_item_ranking", "multi_behavior_purchase_ranking"],
+      "target_file": "model.py",
+      "find": "2.0 * math.log1p(transition)",
+      "replace": "-2.0 * math.log1p(transition)"
+    },
+    {
+      "fault_id": "popularity_signal_inverted",
+      "family": "item_popularity",
+      "title": "Reverse the item-popularity contribution",
+      "task_types": ["sequential_next_item_ranking", "multi_behavior_purchase_ranking"],
+      "target_file": "model.py",
+      "find": "math.log1p(popularity)",
+      "replace": "-math.log1p(popularity)"
+    },
+    {
+      "fault_id": "ranking_comparator_reversed",
+      "family": "serving_ranker",
+      "title": "Reverse the inference-time ranking comparator",
+      "task_types": ["sequential_next_item_ranking", "multi_behavior_purchase_ranking"],
+      "target_file": "predict.py",
+      "find": "candidates.sort(key=lambda item: (-ranking_score(model, user, item), item))",
+      "replace": "candidates.sort(key=lambda item: (ranking_score(model, user, item), item))"
+    },
+    {
+      "fault_id": "point_signal_inverted",
+      "family": "objective_direction",
+      "title": "Invert the complete point-prediction signal",
+      "task_types": ["watch_time_ranking_and_regression"],
+      "target_file": "model.py",
+      "find": "return 0.6 * item_mean + 0.3 * user_mean + 0.1 * global_mean",
+      "replace": "return -(0.6 * item_mean + 0.3 * user_mean + 0.1 * global_mean)"
+    },
+    {
+      "fault_id": "item_signal_inverted",
+      "family": "item_representation",
+      "title": "Reverse the item-specific prediction contribution",
+      "task_types": ["watch_time_ranking_and_regression"],
+      "target_file": "model.py",
+      "find": "0.6 * item_mean",
+      "replace": "-0.6 * item_mean"
+    },
+    {
+      "fault_id": "user_signal_inverted",
+      "family": "user_representation",
+      "title": "Reverse the user-specific prediction contribution",
+      "task_types": ["watch_time_ranking_and_regression"],
+      "target_file": "model.py",
+      "find": "0.3 * user_mean",
+      "replace": "-0.3 * user_mean"
+    }
+  ]
+}

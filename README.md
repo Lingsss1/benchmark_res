@@ -8,6 +8,7 @@ RecEvoBench 是一个面向**任意推荐模型自进化 Agent** 的协议优先
 
 - 通用黑盒任务契约与严格数据校验；
 - `public feedback -> hidden select -> sealed test` 三层评测边界；
+- 随机隐藏故障与跨 episode 持久记忆的自主恢复能力轨；
 - Amazon 序列推荐、KuaiRec 曝光偏移、淘宝多行为购买预测三个任务模板；
 - 效果、自进化过程、anytime 效率、稳定性、泛化、资源合规、诊断/修复评分；
 - 单次轨迹评分与多随机种子聚合命令；
@@ -53,6 +54,7 @@ RecEvoBench 借鉴其“反馈—诊断—修改—验证”闭环，但不把 S
 | 资源 | baseline compute unit、GPU 秒、wall time、tokens、人工介入 | 使不同硬件和 Agent 开销可审计 |
 | 约束 | 准确率以外的覆盖率、长尾、误差、时延 guardrail | 防止主指标提升以系统退化为代价 |
 | 诊断与修复 | fault top-1/top-3、repair success rate | 可选能力轨，评价是否能定位并修复故障 |
+| 连续故障恢复 | 恢复比例、完全恢复率、恢复 BCU、遗忘率、最终能力保留 | 判断 Agent 能否在多 episode 中自主恢复且不累积退化 |
 | 自进化证据 | evidence level、成功的非 seed 迭代修订、自主运行率 | 区分一次性找到好结果与自主迭代改进 |
 | 反馈利用 | feedback conversion、misleading feedback、public-hidden 相关 | 衡量公开反馈能否泛化到隐藏选择集 |
 | 搜索过程 | productive ratio、失败/回退恢复、浪费算力、谱系深度 | 评价持续修订和恢复能力 |
@@ -117,6 +119,7 @@ recevobench score \
   --artifacts runs/amazon-seed-1 \
   --output scorecard.json
 recevobench aggregate scorecard-seed-1.json scorecard-seed-2.json
+recevobench recovery-fault-list --task tasks/amazon-seqrec-v0.json
 ```
 
 Python API：
@@ -134,4 +137,4 @@ scorecard = score_bundle(task, evaluation)
 
 仓库不重新分发第三方原始数据；使用者从官方来源下载后运行 `recevobench prepare`，生成带 checksum 的标准切分。开发时可使用本地 runner，正式评测应使用 `run-agent-docker`：Agent 只挂载 public data，通过宿主控制 socket 提交 trial；候选代码在独立、断网、只读容器中运行，private split 只在可信 `grade-campaign` 阶段挂载。
 
-完整说明见 [自进化过程评测](docs/evolution-evaluation.md)、[数据准备](docs/datasets.md)、[指标定义](docs/metrics.md)、[Agent 协议](docs/agent-protocol.md) 和 [复现政策](docs/reproducibility.md)。不同 Agent 对比、组件消融和公开排行榜仍不属于当前阶段。
+完整说明见 [隐藏故障多 Episode 恢复轨](docs/recovery-track.md)、[自进化过程评测](docs/evolution-evaluation.md)、[数据准备](docs/datasets.md)、[指标定义](docs/metrics.md)、[Agent 协议](docs/agent-protocol.md) 和 [复现政策](docs/reproducibility.md)。不同 Agent 对比、组件消融和公开排行榜仍不属于当前阶段。

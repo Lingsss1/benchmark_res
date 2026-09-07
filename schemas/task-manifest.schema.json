@@ -18,6 +18,7 @@
     "splits": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/split"}},
     "evaluation_protocol": {"type": "object"},
     "editable_paths": {"type": "array", "items": {"type": "string"}},
+    "recovery_protocol": {"$ref": "#/$defs/recoveryProtocol"},
     "runtime": {"type": "object"},
     "artifact_policy": {"type": "object"},
     "metadata": {"type": "object"}
@@ -61,6 +62,19 @@
         "name": {"type": "string", "minLength": 1},
         "visibility": {"enum": ["public", "hidden", "sealed"]},
         "purpose": {"type": "string"}
+      }
+    },
+    "recoveryProtocol": {
+      "type": "object", "additionalProperties": false,
+      "required": ["enabled", "default_episodes", "fault_catalog", "selection"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "default_episodes": {"type": "integer", "minimum": 2},
+        "fault_catalog": {
+          "type": "array", "minItems": 2,
+          "items": {"type": "string", "minLength": 1}, "uniqueItems": true
+        },
+        "selection": {"const": "seeded_without_replacement"}
       }
     }
   }

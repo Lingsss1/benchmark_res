@@ -188,6 +188,7 @@ class TaskManifest:
     splits: tuple[SplitSpec, ...]
     evaluation_protocol: dict[str, Any]
     editable_paths: tuple[str, ...]
+    recovery_protocol: dict[str, Any] = field(default_factory=dict)
     runtime: dict[str, Any] = field(default_factory=dict)
     artifact_policy: dict[str, Any] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -211,6 +212,7 @@ class TaskManifest:
             splits=splits,
             evaluation_protocol=dict(_required(data, "evaluation_protocol", "task")),
             editable_paths=tuple(str(x) for x in data.get("editable_paths", [])),
+            recovery_protocol=dict(data.get("recovery_protocol", {})),
             runtime=dict(data.get("runtime", {})),
             artifact_policy=dict(data.get("artifact_policy", {})),
             metadata=dict(data.get("metadata", {})),

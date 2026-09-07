@@ -17,7 +17,7 @@ from .campaign import (
     run_agent_command,
     run_agent_docker,
 )
-from .control import finalize_remote, submit_remote_trial
+from .control import finalize_remote, submit_remote_recovery_diagnosis, submit_remote_trial
 from .data import prepare_task, verify_dataset_card
 from .evaluation import evaluate_prepared_split
 from .io import (
@@ -27,6 +27,12 @@ from .io import (
     read_json,
     to_jsonable,
     write_json,
+)
+from .recovery import (
+    grade_recovery_campaign,
+    record_recovery_diagnosis,
+    run_recovery_agent,
+    task_faults,
 )
 from .runtime import execute_candidate
 from .schema import SCHEMA_FILES, validate_artifact
@@ -307,6 +313,68 @@ def _cmd_run_agent_docker(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_recovery_fault_list(args: argparse.Namespace) -> int:
+    manifest = load_manifest(args.task)
+    _print_json(
+        {
+            "task_id": manifest.task_id,
+            "faults": [
+                {"fault_id": fault.fault_id, "family": fault.family, "title": fault.title}
+                for fault in task_faults(manifest)
+            ],
+        }
+    )
+    return 0
+
+
+def _cmd_recovery_diagnose(args: argparse.Namespace) -> int:
+    _print_json(record_recovery_diagnosis(args.run_dir, list(args.labels)))
+    return 0
+
+
+def _cmd_remote_recovery_diagnose(args: argparse.Namespace) -> int:
+    _print_json(submit_remote_recovery_diagnosis(args.socket, list(args.labels)))
+    return 0
+
+
+def _recovery_command(args: argparse.Namespace, *, image: str | None) -> int:
+    command = list(args.agent_command)
+    if command and command[0] == "--":
+        command = command[1:]
+    if not command:
+        raise ValueError("recovery runner requires a command after --")
+    result = run_recovery_agent(
+        task_path=args.task,
+        prepared_dir=args.prepared,
+        run_dir=args.run_dir,
+        agent_id=args.agent_id,
+        random_seed=args.seed,
+        command=command,
+        episodes=args.episodes,
+        timeout_seconds=args.trial_timeout,
+        allocated_gpus=args.gpus,
+        image=image,
+        network=getattr(args, "network", "none"),
+        memory=getattr(args, "memory", "32g"),
+        cpus=getattr(args, "cpus", 8.0),
+    )
+    _print_json(result)
+    return 0
+
+
+def _cmd_run_recovery_agent(args: argparse.Namespace) -> int:
+    return _recovery_command(args, image=None)
+
+
+def _cmd_run_recovery_agent_docker(args: argparse.Namespace) -> int:
+    return _recovery_command(args, image=args.image)
+
+
+def _cmd_grade_recovery(args: argparse.Namespace) -> int:
+    _print_json(grade_recovery_campaign(args.run_dir))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="recevobench",
@@ -468,6 +536,67 @@ def build_parser() -> argparse.ArgumentParser:
     run_agent_container.add_argument("--cpus", type=float, default=8.0)
     run_agent_container.add_argument("agent_command", nargs=argparse.REMAINDER)
     run_agent_container.set_defaults(func=_cmd_run_agent_docker)
+
+    recovery_faults = sub.add_parser(
+        "recovery-fault-list", help="list hidden-fault labels available for a task"
+    )
+    recovery_faults.add_argument("--task", required=True, type=Path)
+    recovery_faults.set_defaults(func=_cmd_recovery_fault_list)
+
+    recovery_diagnose = sub.add_parser(
+        "recovery-diagnose", help="submit one diagnosis for the current recovery episode"
+    )
+    recovery_diagnose.add_argument("--run-dir", required=True, type=Path)
+    recovery_diagnose.add_argument("labels", nargs="+", metavar="FAULT_LABEL")
+    recovery_diagnose.set_defaults(func=_cmd_recovery_diagnose)
+
+    remote_recovery_diagnose = sub.add_parser(
+        "remote-recovery-diagnose",
+        help="submit an episode diagnosis through the host control socket",
+    )
+    remote_recovery_diagnose.add_argument("--socket", required=True, type=Path)
+    remote_recovery_diagnose.add_argument("labels", nargs="+", metavar="FAULT_LABEL")
+    remote_recovery_diagnose.set_defaults(func=_cmd_remote_recovery_diagnose)
+
+    run_recovery = sub.add_parser(
+        "run-recovery-agent",
+        help="run a local trusted multi-episode hidden-fault campaign",
+    )
+    run_recovery.add_argument("--task", required=True, type=Path)
+    run_recovery.add_argument("--prepared", required=True, type=Path)
+    run_recovery.add_argument("--run-dir", required=True, type=Path)
+    run_recovery.add_argument("--agent-id", required=True)
+    run_recovery.add_argument("--seed", required=True, type=int)
+    run_recovery.add_argument("--episodes", type=int)
+    run_recovery.add_argument("--trial-timeout", type=float, default=3600.0)
+    run_recovery.add_argument("--gpus", type=int, default=1)
+    run_recovery.add_argument("agent_command", nargs=argparse.REMAINDER)
+    run_recovery.set_defaults(func=_cmd_run_recovery_agent)
+
+    run_recovery_docker = sub.add_parser(
+        "run-recovery-agent-docker",
+        help="run an isolated multi-episode hidden-fault campaign",
+    )
+    run_recovery_docker.add_argument("--task", required=True, type=Path)
+    run_recovery_docker.add_argument("--prepared", required=True, type=Path)
+    run_recovery_docker.add_argument("--run-dir", required=True, type=Path)
+    run_recovery_docker.add_argument("--agent-id", required=True)
+    run_recovery_docker.add_argument("--seed", required=True, type=int)
+    run_recovery_docker.add_argument("--episodes", type=int)
+    run_recovery_docker.add_argument("--image", required=True)
+    run_recovery_docker.add_argument("--trial-timeout", type=float, default=3600.0)
+    run_recovery_docker.add_argument("--gpus", type=int, default=1)
+    run_recovery_docker.add_argument("--network", choices=("none", "bridge"), default="none")
+    run_recovery_docker.add_argument("--memory", default="32g")
+    run_recovery_docker.add_argument("--cpus", type=float, default=8.0)
+    run_recovery_docker.add_argument("agent_command", nargs=argparse.REMAINDER)
+    run_recovery_docker.set_defaults(func=_cmd_run_recovery_agent_docker)
+
+    grade_recovery = sub.add_parser(
+        "grade-recovery", help="trusted grading for a completed recovery campaign"
+    )
+    grade_recovery.add_argument("--run-dir", required=True, type=Path)
+    grade_recovery.set_defaults(func=_cmd_grade_recovery)
     return parser
 
 

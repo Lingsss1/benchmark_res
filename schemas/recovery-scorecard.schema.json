@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:recevobench:schema:recovery-scorecard:1.0",
+  "title": "RecEvoBench hidden-fault multi-episode recovery scorecard",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "protocol", "run_id", "task_id", "agent_id", "random_seed",
+    "n_episodes", "n_scorable_episodes", "mean_recovery_fraction",
+    "full_recovery_rate", "autonomous_recovery_rate", "mean_recovery_compute_units",
+    "diagnosis_top1_accuracy", "diagnosis_top3_accuracy",
+    "catastrophic_forgetting_rate", "cumulative_unrecovered_fraction",
+    "final_clean_retention", "autonomous_run", "self_evolution_recovery_verified",
+    "episodes"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "protocol": {"const": "hidden-fault-multi-episode-v1"},
+    "run_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "agent_id": {"type": "string", "minLength": 1},
+    "random_seed": {"type": "integer"},
+    "n_episodes": {"type": "integer", "minimum": 2},
+    "n_scorable_episodes": {"type": "integer", "minimum": 0},
+    "mean_recovery_fraction": {"$ref": "#/$defs/nullableFraction"},
+    "full_recovery_rate": {"$ref": "#/$defs/nullableFraction"},
+    "autonomous_recovery_rate": {"$ref": "#/$defs/nullableFraction"},
+    "mean_recovery_compute_units": {"type": ["number", "null"], "minimum": 0},
+    "diagnosis_top1_accuracy": {"$ref": "#/$defs/fraction"},
+    "diagnosis_top3_accuracy": {"$ref": "#/$defs/fraction"},
+    "catastrophic_forgetting_rate": {"$ref": "#/$defs/nullableFraction"},
+    "cumulative_unrecovered_fraction": {"$ref": "#/$defs/nullableFraction"},
+    "final_clean_retention": {"type": ["number", "null"]},
+    "autonomous_run": {"type": "boolean"},
+    "self_evolution_recovery_verified": {"type": "boolean"},
+    "episodes": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"$ref": "#/$defs/episode"}
+    }
+  },
+  "$defs": {
+    "fraction": {"type": "number", "minimum": 0, "maximum": 1},
+    "nullableFraction": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "episode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "episode_index", "fault_id", "fault_family", "diagnosis_labels",
+        "diagnosis_top1_correct", "diagnosis_top3_correct", "pre_fault_test_metric",
+        "faulted_test_metric", "final_test_metric", "normalized_fault_severity",
+        "normalized_recovery_gain", "recovery_fraction", "fully_recovered",
+        "catastrophic_forgetting", "recovery_compute_units", "budget_compliant",
+        "guardrails_passed", "human_interventions"
+      ],
+      "properties": {
+        "episode_index": {"type": "integer", "minimum": 1},
+        "fault_id": {"type": "string", "minLength": 1},
+        "fault_family": {"type": "string", "minLength": 1},
+        "diagnosis_labels": {
+          "type": "array", "maxItems": 3,
+          "items": {"type": "string", "minLength": 1}, "uniqueItems": true
+        },
+        "diagnosis_top1_correct": {"type": "boolean"},
+        "diagnosis_top3_correct": {"type": "boolean"},
+        "pre_fault_test_metric": {"type": "number"},
+        "faulted_test_metric": {"type": "number"},
+        "final_test_metric": {"type": "number"},
+        "normalized_fault_severity": {"type": "number", "minimum": 0},
+        "normalized_recovery_gain": {"type": "number"},
+        "recovery_fraction": {"$ref": "#/$defs/nullableFraction"},
+        "fully_recovered": {"type": "boolean"},
+        "catastrophic_forgetting": {"type": "boolean"},
+        "recovery_compute_units": {"type": ["number", "null"], "minimum": 0},
+        "budget_compliant": {"type": "boolean"},
+        "guardrails_passed": {"type": "boolean"},
+        "human_interventions": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

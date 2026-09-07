@@ -3,6 +3,7 @@ include CHANGELOG.md CITATION.cff CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md
 recursive-include docs *.md
 recursive-include docker *
 recursive-include examples *.json *.py
+recursive-include faults *.json
 recursive-include schemas *.json
 recursive-include seed *.py *.json
 recursive-include tasks *.json

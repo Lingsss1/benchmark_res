@@ -12,10 +12,10 @@ COPY pyproject.toml README.md LICENSE ./
 COPY src ./src
 COPY schemas ./schemas
 COPY tasks ./tasks
+COPY faults ./faults
 COPY seed ./seed
 RUN python -m pip install .
 
 USER benchmark
 WORKDIR /benchmark/workspace
 ENTRYPOINT ["recevobench"]
-

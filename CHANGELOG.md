@@ -7,6 +7,9 @@ create a new task ID rather than silently changing historical scores.
 
 ### Added
 
+- Seeded hidden-fault, multi-episode recovery campaigns with persistent agent memory.
+- One-shot recovery diagnosis over the host control socket and isolated Docker mounts.
+- Sealed recovery metrics, strict verification, schema, CLI, docs and conformance tests.
 - Three-layer public, hidden-select and sealed-test protocol.
 - Amazon Reviews, KuaiRec and Taobao UserBehavior preparation adapters.
 - Canonical ranking, binary, continuous-label and resource metrics.

@@ -21,3 +21,6 @@ def test_all_task_manifests_are_valid_and_have_three_visibility_layers() -> None
         }
         assert manifest.budget.max_compute_units > 0
         assert manifest.editable_paths
+        assert manifest.recovery_protocol["enabled"] is True
+        assert manifest.recovery_protocol["default_episodes"] >= 2
+        assert len(set(manifest.recovery_protocol["fault_catalog"])) >= 2

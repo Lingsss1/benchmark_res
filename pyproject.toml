@@ -33,6 +33,7 @@ where = ["src"]
 [tool.setuptools.data-files]
 "share/recevobench/schemas" = ["schemas/*.json"]
 "share/recevobench/tasks" = ["tasks/*.json"]
+"share/recevobench/faults" = ["faults/*.json"]
 "share/recevobench/seed/simple_rec" = ["seed/simple_rec/*.py"]
 "share/recevobench/seed/simple_rec/config" = ["seed/simple_rec/config/*.json"]
 

@@ -80,6 +80,16 @@
     "**/*.py",
     "config/**"
   ],
+  "recovery_protocol": {
+    "enabled": true,
+    "default_episodes": 2,
+    "fault_catalog": [
+      "point_signal_inverted",
+      "item_signal_inverted",
+      "user_signal_inverted"
+    ],
+    "selection": "seeded_without_replacement"
+  },
   "runtime": {
     "seed_workspace": "seed/simple_rec",
     "train_command": ["python", "train.py", "--train", "{train}", "--model-out", "{model}"],

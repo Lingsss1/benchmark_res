@@ -45,4 +45,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t recevobench:ci -f docker/Dockerfile .
-
+      - run: docker run --rm recevobench:ci recovery-fault-list --task amazon-seqrec-v0

@@ -5,6 +5,11 @@ recommender-system agents. It standardizes the task package, seed model, visible
 feedback, budgets, trajectory artifacts and trusted grading boundary without
 requiring any particular LLM, search strategy, memory or diagnostic tool.
 
+It also includes a seeded hidden-fault, multi-episode recovery track with
+persistent agent memory, one-shot diagnosis, trusted sealed grading and a
+strict autonomous-recovery verification flag. See the
+[recovery protocol](docs/recovery-track.md).
+
 The repository ships three executable task families:
 
 - chronological Amazon next-item recommendation;
@@ -34,6 +39,7 @@ development only.
 
 See [datasets](docs/datasets.md), [metrics](docs/metrics.md),
 [self-evolution evaluation](docs/evolution-evaluation.md),
+[hidden-fault recovery](docs/recovery-track.md),
 [agent protocol](docs/agent-protocol.md), [reproducibility](docs/reproducibility.md)
 and [contributing](CONTRIBUTING.md).
 

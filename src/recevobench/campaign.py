@@ -58,6 +58,8 @@ def initialize_campaign(
     timeout_seconds: float = 3600.0,
     allocated_gpus: int = 1,
     sandbox_image: str | None = None,
+    seed_workspace_source: str | Path | None = None,
+    run_id: str | None = None,
 ) -> dict[str, Any]:
     task = resolve_task_path(task_path)
     prepared = Path(prepared_dir).resolve()
@@ -70,7 +72,13 @@ def initialize_campaign(
     _safe_id(agent_id, "agent_id")
     seed_workspace = destination / "seed-workspace"
     workspace = destination / "workspace"
-    copy_seed_workspace(manifest, seed_workspace)
+    if seed_workspace_source is None:
+        copy_seed_workspace(manifest, seed_workspace)
+    else:
+        source = Path(seed_workspace_source).resolve()
+        if not source.is_dir():
+            raise CampaignError(f"seed workspace source is not a directory: {source}")
+        _copy_candidate(source, seed_workspace)
     shutil.copytree(seed_workspace, workspace)
     baseline_output = destination / "baseline" / "feedback"
     execution_options = {
@@ -100,7 +108,7 @@ def initialize_campaign(
     baseline_compute = max(1e-9, baseline.compute_seconds)
     lock = {
         "schema_version": "1.0",
-        "run_id": f"{manifest.task_id}-{agent_id}-{random_seed}",
+        "run_id": run_id or f"{manifest.task_id}-{agent_id}-{random_seed}",
         "task_id": manifest.task_id,
         "agent_id": agent_id,
         "random_seed": random_seed,

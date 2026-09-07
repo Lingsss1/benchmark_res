@@ -46,6 +46,17 @@ class _Controller:
                     candidate_id + "\n", encoding="utf-8"
                 )
                 return {"ok": True, "candidate_id": candidate_id}
+            if action == "recovery_diagnosis":
+                from .recovery import record_recovery_diagnosis
+
+                labels = request.get("labels")
+                if not isinstance(labels, list):
+                    raise ControlError("recovery diagnosis labels must be a list")
+                result = record_recovery_diagnosis(
+                    self.run_dir,
+                    [str(label) for label in labels],
+                )
+                return {"ok": True, "result": result}
             if action == "ping":
                 return {"ok": True, "protocol": "recevobench-control-v1"}
             raise ControlError(f"unknown control action: {action!r}")
@@ -136,3 +147,10 @@ def submit_remote_trial(
 
 def finalize_remote(socket_path: str | Path, candidate_id: str) -> dict[str, Any]:
     return control_request(socket_path, {"action": "finalize", "candidate_id": candidate_id})
+
+
+def submit_remote_recovery_diagnosis(
+    socket_path: str | Path,
+    labels: list[str],
+) -> dict[str, Any]:
+    return control_request(socket_path, {"action": "recovery_diagnosis", "labels": labels})

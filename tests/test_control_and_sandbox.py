@@ -6,6 +6,7 @@ from recevobench.control import (
     ControlServer,
     control_request,
     finalize_remote,
+    submit_remote_recovery_diagnosis,
     submit_remote_trial,
 )
 from recevobench.data import prepare_task
@@ -102,4 +103,36 @@ def test_agent_docker_mounts_only_public_data_and_control_socket(tmp_path) -> No
     rendered = " ".join(command)
     assert "RECEVOBENCH_CONTROL_SOCKET=/benchmark/control/control.sock" in rendered
     assert "--network none" in rendered
+    assert "/benchmark/prepared/private" not in rendered
+
+
+def test_recovery_control_and_persistent_memory_mount(tmp_path) -> None:
+    _, _, run_dir = _campaign(tmp_path)
+    (run_dir / "recovery-context.json").write_text(
+        '{"fault_label_vocabulary":["ranking_signal_inverted"]}',
+        encoding="utf-8",
+    )
+    socket_path = Path("/tmp") / f"rvb-recovery-{os.getpid()}-{tmp_path.name}.sock"
+    with ControlServer(socket_path, run_dir):
+        response = submit_remote_recovery_diagnosis(socket_path, ["ranking_signal_inverted"])
+    assert response["result"]["labels"] == ["ranking_signal_inverted"]
+
+    for name in ("workspace", "public", "control", "memory"):
+        (tmp_path / name).mkdir(exist_ok=True)
+    task = ROOT / "tasks" / "amazon-seqrec-v0.json"
+    command = build_agent_docker_command(
+        image="recevobench:test",
+        workspace=tmp_path / "workspace",
+        public_data=tmp_path / "public",
+        task_path=task,
+        control_directory=tmp_path / "control",
+        command=["python", "-m", "recevobench.recovery_conformance_agent"],
+        allocated_gpus=0,
+        extra_environment={"RECEVOBENCH_RECOVERY_EPISODE": "1"},
+        extra_mounts=((tmp_path / "memory", "/benchmark/memory", False),),
+    )
+    rendered = " ".join(command)
+    assert "RECEVOBENCH_RECOVERY_EPISODE=1" in rendered
+    assert "dst=/benchmark/memory" in rendered
+    assert "dst=/benchmark/memory,readonly" not in rendered
     assert "/benchmark/prepared/private" not in rendered

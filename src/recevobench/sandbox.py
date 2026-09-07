@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from .contracts import TaskManifest
@@ -30,6 +30,8 @@ def build_agent_docker_command(
     network: str = "none",
     memory: str = "32g",
     cpus: float = 8.0,
+    extra_environment: Mapping[str, str] | None = None,
+    extra_mounts: Sequence[tuple[Path, str, bool]] = (),
 ) -> list[str]:
     if not command:
         raise RuntimeError("agent container command cannot be empty")
@@ -73,6 +75,11 @@ def build_agent_docker_command(
         "--env",
         "RECEVOBENCH_CONTROL_SOCKET=/benchmark/control/control.sock",
     ]
+    for source, destination, read_only in extra_mounts:
+        suffix = ",readonly" if read_only else ""
+        docker.extend(["--mount", f"type=bind,src={source.resolve()},dst={destination}{suffix}"])
+    for key, value in sorted((extra_environment or {}).items()):
+        docker.extend(["--env", f"{key}={value}"])
     if allocated_gpus > 0:
         docker.extend(["--gpus", str(allocated_gpus)])
     docker.extend(["--entrypoint", command[0], image, *command[1:]])

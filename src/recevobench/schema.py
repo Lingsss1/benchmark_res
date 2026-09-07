@@ -14,6 +14,7 @@ SCHEMA_FILES = {
     "dataset": "dataset-card.schema.json",
     "evaluation": "evaluation-bundle.schema.json",
     "scorecard": "scorecard.schema.json",
+    "recovery-scorecard": "recovery-scorecard.schema.json",
 }
 
 
