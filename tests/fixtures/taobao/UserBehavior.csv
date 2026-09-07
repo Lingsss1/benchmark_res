@@ -1,0 +1,14 @@
+user_id,item_id,category_id,behavior_type,timestamp
+u1,i1,c1,pv,1
+u1,i2,c1,buy,10
+u2,i2,c1,pv,20
+u2,i3,c2,buy,30
+u1,i3,c2,cart,50
+u2,i1,c1,fav,69
+u1,i4,c2,buy,72
+u2,i4,c2,pv,75
+u1,i2,c1,buy,82
+u2,i3,c2,buy,85
+u1,i3,c2,buy,92
+u2,i1,c1,pv,93
+u2,i4,c2,buy,98

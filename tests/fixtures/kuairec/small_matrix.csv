@@ -1,0 +1,9 @@
+user_id,video_id,play_duration,video_duration,timestamp,watch_ratio
+u1,v1,10,10,10,1.0
+u1,v2,20,10,11,2.0
+u1,v3,5,10,12,0.5
+u1,v4,30,10,13,3.0
+u2,v1,5,10,10,0.5
+u2,v2,10,10,11,1.0
+u2,v3,15,10,12,1.5
+u2,v4,25,10,13,2.5

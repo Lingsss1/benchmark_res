@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:recevobench:schema:task-manifest:1.0",
+  "title": "RecEvoBench task manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "title", "dataset_family", "task_type", "primary_metric", "budget", "splits", "evaluation_protocol", "editable_paths"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "task_id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9._-]*$"},
+    "title": {"type": "string", "minLength": 1},
+    "dataset_family": {"type": "string", "minLength": 1},
+    "task_type": {"type": "string", "minLength": 1},
+    "primary_metric": {"$ref": "#/$defs/metric"},
+    "secondary_metrics": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "guardrails": {"type": "array", "items": {"$ref": "#/$defs/guardrail"}},
+    "budget": {"$ref": "#/$defs/budget"},
+    "splits": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/split"}},
+    "evaluation_protocol": {"type": "object"},
+    "editable_paths": {"type": "array", "items": {"type": "string"}},
+    "runtime": {"type": "object"},
+    "artifact_policy": {"type": "object"},
+    "metadata": {"type": "object"}
+  },
+  "$defs": {
+    "metric": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "direction"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["maximize", "minimize"]},
+        "lower_bound": {"type": "number"}, "upper_bound": {"type": "number"},
+        "absolute_epsilon": {"type": "number", "minimum": 0},
+        "relative_epsilon": {"type": "number", "minimum": 0}
+      }
+    },
+    "guardrail": {
+      "type": "object", "additionalProperties": false,
+      "required": ["metric", "direction"],
+      "properties": {
+        "metric": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["maximize", "minimize"]},
+        "max_absolute_degradation": {"type": "number", "minimum": 0},
+        "max_relative_degradation": {"type": "number", "minimum": 0}
+      }
+    },
+    "budget": {
+      "type": "object", "additionalProperties": false,
+      "required": ["max_compute_units", "max_trials"],
+      "properties": {
+        "max_compute_units": {"type": "number", "exclusiveMinimum": 0},
+        "max_trials": {"type": "integer", "minimum": 1},
+        "max_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "max_tokens": {"type": "integer", "minimum": 1}
+      }
+    },
+    "split": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "visibility"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "visibility": {"enum": ["public", "hidden", "sealed"]},
+        "purpose": {"type": "string"}
+      }
+    }
+  }
+}

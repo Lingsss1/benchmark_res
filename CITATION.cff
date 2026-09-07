@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use RecEvoBench, please cite this software and the original datasets."
+title: "RecEvoBench: A Protocol-First Benchmark for Self-Evolving Recommender-System Agents"
+type: software
+authors:
+  - name: "RecEvoBench Contributors"
+version: 0.1.0
+date-released: 2026-09-06
+license: MIT
+keywords:
+  - recommender systems
+  - autonomous agents
+  - model evolution
+  - benchmark

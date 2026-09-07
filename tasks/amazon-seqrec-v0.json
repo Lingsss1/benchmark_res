@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "task_id": "amazon-seqrec-v0",
+  "title": "Amazon Reviews chronological next-item recommendation",
+  "dataset_family": "Amazon Reviews",
+  "task_type": "sequential_next_item_ranking",
+  "primary_metric": {
+    "name": "NDCG@10",
+    "direction": "maximize",
+    "lower_bound": 0.0,
+    "upper_bound": 1.0,
+    "absolute_epsilon": 0.001,
+    "relative_epsilon": 0.005
+  },
+  "secondary_metrics": [
+    "Recall@10",
+    "Recall@20",
+    "MRR@10",
+    "NDCG@20"
+  ],
+  "guardrails": [
+    {
+      "metric": "Recall@10",
+      "direction": "maximize",
+      "max_relative_degradation": 0.01
+    },
+    {
+      "metric": "CatalogCoverage@10",
+      "direction": "maximize",
+      "max_relative_degradation": 0.02
+    },
+    {
+      "metric": "InferenceP95Ms",
+      "direction": "minimize",
+      "max_relative_degradation": 0.20
+    }
+  ],
+  "budget": {
+    "max_compute_units": 24.0,
+    "max_trials": 64,
+    "max_wall_seconds": 43200,
+    "max_tokens": 5000000
+  },
+  "splits": [
+    {
+      "name": "train",
+      "visibility": "public",
+      "purpose": "model fitting; no evaluation labels from later windows"
+    },
+    {
+      "name": "feedback_dev",
+      "visibility": "public",
+      "purpose": "fast feedback exposed to the agent during evolution"
+    },
+    {
+      "name": "hidden_select",
+      "visibility": "hidden",
+      "purpose": "consistent background evaluation; never returned to the agent"
+    },
+    {
+      "name": "sealed_test",
+      "visibility": "sealed",
+      "purpose": "one-shot final evaluation after the run is closed"
+    }
+  ],
+  "evaluation_protocol": {
+    "split_strategy": "per-user chronological last-three holdout",
+    "feedback_target": "third-most-recent eligible interaction",
+    "hidden_select_target": "second-most-recent eligible interaction",
+    "sealed_test_target": "most-recent eligible interaction",
+    "minimum_user_interactions": 5,
+    "main_ranking": "full_catalog",
+    "sampled_candidates_allowed_for_feedback_only": false,
+    "tie_break": "stable_item_id_ascending",
+    "frozen_randomness": true,
+    "required_strata": [
+      "short_vs_long_history",
+      "head_vs_tail_item",
+      "low_vs_high_activity_user"
+    ]
+  },
+  "editable_paths": [
+    "**/*.py",
+    "config/**"
+  ],
+  "runtime": {
+    "seed_workspace": "seed/simple_rec",
+    "train_command": ["python", "train.py", "--train", "{train}", "--model-out", "{model}"],
+    "predict_command": ["python", "predict.py", "--mode", "ranking", "--model", "{model}", "--input", "{split}", "--catalog", "{catalog}", "--output-dir", "{predictions}", "--top-k", "20"],
+    "model_artifact": "artifacts/model.json",
+    "prediction_format": "ranking-jsonl",
+    "latency_repeats": 20,
+    "latency_sample_rows": 128,
+    "latency_sample_users": 1
+  },
+  "artifact_policy": {
+    "required_candidate_files": ["train.py", "predict.py", "model.py"],
+    "max_candidate_bytes": 104857600
+  },
+  "metadata": {
+    "dataset_path": "DATASET_ROOT/amazon",
+    "official_source": "https://amazon-reviews-2023.github.io/",
+    "notes": "Dataset category is selected by the benchmark campaign; the evaluator remains category-agnostic."
+  }
+}

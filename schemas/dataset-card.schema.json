@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:recevobench:schema:dataset-card:1.0",
+  "title": "RecEvoBench prepared dataset card",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "task_id", "adapter", "adapter_version", "sources", "splits", "catalog", "statistics", "license", "protocol"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "task_id": {"type": "string", "minLength": 1},
+    "adapter": {"type": "string", "minLength": 1},
+    "adapter_version": {"type": "string", "minLength": 1},
+    "sources": {"type": "array", "items": {"$ref": "#/$defs/source"}, "minItems": 1},
+    "splits": {"type": "object", "additionalProperties": {"$ref": "#/$defs/artifact"}, "minProperties": 2},
+    "catalog": {"$ref": "#/$defs/artifact"},
+    "statistics": {"type": "object"},
+    "license": {"type": "object", "additionalProperties": {"type": "string"}},
+    "protocol": {"type": "object"}
+  },
+  "$defs": {
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "sha256"],
+      "properties": {"name": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+    },
+    "artifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "rows", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "rows": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}

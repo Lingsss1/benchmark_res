@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e '.[dev]'
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest --cov=recevobench --cov-report=term-missing
+      - run: recebovenv=$(mktemp -d) && recevobench smoke --output "$recebovenv/smoke"
+      - run: python -m build
+
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e .
+      - run: for task in tasks/*.json; do recevobench validate-schema --kind task --input "$task"; done
+      - run: recevobench validate-schema --kind run --input examples/amazon-public-run.example.json
+      - run: recevobench validate-schema --kind evaluation --input examples/amazon-evaluation.example.json
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t recevobench:ci -f docker/Dockerfile .
+

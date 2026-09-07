@@ -1,0 +1,94 @@
+{
+  "run": {
+    "run_id": "example-amazon-run-001",
+    "task_id": "amazon-seqrec-v0",
+    "agent_id": "example-black-box-agent",
+    "random_seed": 7,
+    "final_candidate_id": "cand-003",
+    "baseline_compute_seconds": 100.0,
+    "elapsed_wall_seconds": 1260.0,
+    "trials": [
+      {
+        "step": 1,
+        "candidate_id": "cand-001",
+        "parent_id": "seed",
+        "status": "valid",
+        "public_metric": 0.205,
+        "hidden_select_metric": 0.198,
+        "gpu_seconds": 450.0,
+        "wall_seconds": 450.0,
+        "input_tokens": 12000,
+        "output_tokens": 2500,
+        "promoted": true,
+        "candidate_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "hypothesis": "Improve short-term intent modeling without changing the evaluator."
+      },
+      {
+        "step": 2,
+        "candidate_id": "cand-002",
+        "parent_id": "cand-001",
+        "status": "oom",
+        "public_metric": null,
+        "hidden_select_metric": null,
+        "gpu_seconds": 180.0,
+        "wall_seconds": 180.0,
+        "input_tokens": 9000,
+        "output_tokens": 1800,
+        "promoted": false,
+        "candidate_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "hypothesis": "Increase capacity."
+      },
+      {
+        "step": 3,
+        "candidate_id": "cand-003",
+        "parent_id": "cand-001",
+        "status": "valid",
+        "public_metric": 0.221,
+        "hidden_select_metric": 0.216,
+        "gpu_seconds": 510.0,
+        "wall_seconds": 510.0,
+        "input_tokens": 15000,
+        "output_tokens": 3200,
+        "promoted": true,
+        "candidate_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "hypothesis": "Use recency-aware pooling for the final sequence state."
+      }
+    ]
+  },
+  "baseline_public_metrics": {
+    "NDCG@10": 0.191
+  },
+  "baseline_hidden_select_metrics": {
+    "NDCG@10": 0.190
+  },
+  "baseline_test_metrics": {
+    "NDCG@10": 0.188
+  },
+  "final_test_metrics": {
+    "NDCG@10": 0.211
+  },
+  "baseline_guardrail_metrics": {
+    "Recall@10": 0.301,
+    "CatalogCoverage@10": 0.184,
+    "InferenceP95Ms": 12.0
+  },
+  "final_guardrail_metrics": {
+    "Recall@10": 0.329,
+    "CatalogCoverage@10": 0.188,
+    "InferenceP95Ms": 13.1
+  },
+  "faults": [
+    {
+      "fault_id": "order-blind-001",
+      "target_label": "order_insensitivity",
+      "predicted_labels": ["order_insensitivity", "embedding_collapse"],
+      "repaired": true
+    },
+    {
+      "fault_id": "popularity-001",
+      "target_label": "popularity_bias",
+      "predicted_labels": ["category_mismatch", "popularity_bias"],
+      "repaired": false
+    }
+  ]
+}

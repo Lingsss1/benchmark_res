@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:recevobench:schema:evaluation-bundle:1.0",
+  "title": "RecEvoBench trusted evaluation bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run", "baseline_hidden_select_metrics", "baseline_test_metrics", "final_test_metrics", "baseline_guardrail_metrics", "final_guardrail_metrics"],
+  "properties": {
+    "run": {"$ref": "#/$defs/run"},
+    "baseline_hidden_select_metrics": {"$ref": "#/$defs/metrics"},
+    "baseline_test_metrics": {"$ref": "#/$defs/metrics"},
+    "final_test_metrics": {"$ref": "#/$defs/metrics"},
+    "baseline_guardrail_metrics": {"$ref": "#/$defs/metrics"},
+    "final_guardrail_metrics": {"$ref": "#/$defs/metrics"},
+    "baseline_public_metrics": {"$ref": "#/$defs/metrics"},
+    "faults": {"type": "array", "items": {"$ref": "#/$defs/fault"}}
+  },
+  "$defs": {
+    "metrics": {"type": "object", "additionalProperties": {"type": "number"}},
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "task_id", "agent_id", "random_seed", "final_candidate_id", "baseline_compute_seconds", "elapsed_wall_seconds", "trials"],
+      "properties": {
+        "run_id": {"type": "string", "minLength": 1},
+        "task_id": {"type": "string", "minLength": 1},
+        "agent_id": {"type": "string", "minLength": 1},
+        "random_seed": {"type": "integer"},
+        "final_candidate_id": {"type": "string", "minLength": 1},
+        "baseline_compute_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "elapsed_wall_seconds": {"type": "number", "minimum": 0},
+        "trials": {"type": "array", "items": {"$ref": "#/$defs/trial"}}
+      }
+    },
+    "trial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step", "candidate_id", "status", "public_metric", "hidden_select_metric", "gpu_seconds", "wall_seconds"],
+      "properties": {
+        "step": {"type": "integer", "minimum": 1},
+        "candidate_id": {"type": "string", "minLength": 1},
+        "parent_id": {"type": ["string", "null"]},
+        "status": {"enum": ["valid", "crash", "oom", "timeout", "protocol_violation", "invalid"]},
+        "public_metric": {"type": ["number", "null"]},
+        "hidden_select_metric": {"type": ["number", "null"]},
+        "gpu_seconds": {"type": "number", "minimum": 0},
+        "wall_seconds": {"type": "number", "minimum": 0},
+        "compute_seconds": {"type": ["number", "null"], "minimum": 0},
+        "input_tokens": {"type": "integer", "minimum": 0},
+        "output_tokens": {"type": "integer", "minimum": 0},
+        "promoted": {"type": "boolean"},
+        "hypothesis": {"type": "string"},
+        "human_interventions": {"type": "integer", "minimum": 0},
+        "candidate_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "fault": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fault_id", "target_label", "predicted_labels", "repaired"],
+      "properties": {
+        "fault_id": {"type": "string", "minLength": 1},
+        "target_label": {"type": "string", "minLength": 1},
+        "predicted_labels": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "repaired": {"type": "boolean"}
+      }
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "task_id": "taobao-purchase-v0",
+  "title": "Taobao multi-behavior next-purchase recommendation",
+  "dataset_family": "Taobao UserBehavior",
+  "task_type": "multi_behavior_purchase_ranking",
+  "primary_metric": {
+    "name": "PurchaseGAUC",
+    "direction": "maximize",
+    "lower_bound": 0.0,
+    "upper_bound": 1.0,
+    "absolute_epsilon": 0.001,
+    "relative_epsilon": 0.005
+  },
+  "secondary_metrics": [
+    "PurchaseNDCG@10",
+    "PurchaseRecall@10",
+    "LogLoss",
+    "ClickGAUC"
+  ],
+  "guardrails": [
+    {
+      "metric": "LogLoss",
+      "direction": "minimize",
+      "max_relative_degradation": 0.01
+    },
+    {
+      "metric": "PurchaseRecall@10",
+      "direction": "maximize",
+      "max_relative_degradation": 0.01
+    },
+    {
+      "metric": "TailPurchaseRecall@10",
+      "direction": "maximize",
+      "max_relative_degradation": 0.02
+    },
+    {
+      "metric": "InferenceP95Ms",
+      "direction": "minimize",
+      "max_relative_degradation": 0.20
+    }
+  ],
+  "budget": {
+    "max_compute_units": 24.0,
+    "max_trials": 64,
+    "max_wall_seconds": 43200,
+    "max_tokens": 5000000
+  },
+  "splits": [
+    {
+      "name": "train_early_window",
+      "visibility": "public",
+      "purpose": "model fitting on click, favorite, cart, and purchase histories"
+    },
+    {
+      "name": "feedback_dev_window",
+      "visibility": "public",
+      "purpose": "fast feedback from the first future time window"
+    },
+    {
+      "name": "hidden_select_window",
+      "visibility": "hidden",
+      "purpose": "consistent selection on a later future window"
+    },
+    {
+      "name": "sealed_test_window",
+      "visibility": "sealed",
+      "purpose": "final evaluation on the latest future window"
+    }
+  ],
+  "evaluation_protocol": {
+    "split_strategy": "global chronological windows",
+    "behavior_types": ["click", "favorite", "cart", "purchase"],
+    "positive_target": "purchase",
+    "candidate_protocol": "full_catalog",
+    "random_negative_sampling_for_main_score": false,
+    "frozen_randomness": true,
+    "required_strata": [
+      "click_only_vs_purchase_history",
+      "head_vs_tail_item",
+      "low_vs_high_activity_user",
+      "normal_vs_campaign_period"
+    ]
+  },
+  "editable_paths": [
+    "**/*.py",
+    "config/**"
+  ],
+  "runtime": {
+    "seed_workspace": "seed/simple_rec",
+    "train_command": ["python", "train.py", "--train", "{train}", "--model-out", "{model}"],
+    "predict_command": ["python", "predict.py", "--mode", "ranking", "--model", "{model}", "--input", "{split}", "--catalog", "{catalog}", "--output-dir", "{predictions}", "--top-k", "20", "--write-point-scores", "--include-seen"],
+    "model_artifact": "artifacts/model.json",
+    "prediction_format": "ranking-jsonl+point-csv",
+    "latency_repeats": 20,
+    "latency_sample_rows": 128,
+    "latency_sample_users": 1
+  },
+  "artifact_policy": {
+    "required_candidate_files": ["train.py", "predict.py", "model.py"],
+    "max_candidate_bytes": 104857600
+  },
+  "metadata": {
+    "dataset_path": "DATASET_ROOT/taobao",
+    "official_source": "https://tianchi.aliyun.com/dataset/649",
+    "notes": "Exact cutoff timestamps must be frozen in the campaign lockfile before a public run."
+  }
+}

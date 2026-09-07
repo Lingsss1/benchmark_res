@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:recevobench:schema:public-run:1.0",
+  "title": "RecEvoBench public agent run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "task_id", "agent_id", "random_seed", "final_candidate_id", "baseline_compute_seconds", "elapsed_wall_seconds", "trials"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "agent_id": {"type": "string", "minLength": 1},
+    "random_seed": {"type": "integer"},
+    "final_candidate_id": {"type": "string", "minLength": 1},
+    "baseline_compute_seconds": {"type": "number", "exclusiveMinimum": 0},
+    "elapsed_wall_seconds": {"type": "number", "minimum": 0},
+    "trials": {"type": "array", "items": {"$ref": "#/$defs/trial"}}
+  },
+  "$defs": {
+    "trial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step", "candidate_id", "status", "public_metric", "hidden_select_metric", "gpu_seconds", "wall_seconds"],
+      "properties": {
+        "step": {"type": "integer", "minimum": 1},
+        "candidate_id": {"type": "string", "minLength": 1},
+        "parent_id": {"type": ["string", "null"]},
+        "status": {"enum": ["valid", "crash", "oom", "timeout", "protocol_violation", "invalid"]},
+        "public_metric": {"type": ["number", "null"]},
+        "hidden_select_metric": {"type": "null"},
+        "gpu_seconds": {"type": "number", "minimum": 0},
+        "wall_seconds": {"type": "number", "minimum": 0},
+        "compute_seconds": {"type": ["number", "null"], "minimum": 0},
+        "input_tokens": {"type": "integer", "minimum": 0},
+        "output_tokens": {"type": "integer", "minimum": 0},
+        "promoted": {"type": "boolean"},
+        "hypothesis": {"type": "string"},
+        "human_interventions": {"type": "integer", "minimum": 0},
+        "candidate_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}

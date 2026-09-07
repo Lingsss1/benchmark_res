@@ -1,0 +1,14 @@
+RecEvoBench software is licensed under the MIT License.
+
+Datasets are not distributed by this repository and are not covered by the
+RecEvoBench software license. Users must obtain each dataset from its official
+source and comply with the corresponding terms:
+
+- Amazon Reviews 2023: https://amazon-reviews-2023.github.io/
+- KuaiRec: https://kuairec.com/ (the upstream repository states CC-BY-SA-4.0)
+- Taobao UserBehavior: https://tianchi.aliyun.com/dataset/649
+
+Generated dataset cards preserve source-file checksums and redistribution
+notices. A prepared dataset directory must not be uploaded unless its upstream
+license explicitly permits redistribution.
+

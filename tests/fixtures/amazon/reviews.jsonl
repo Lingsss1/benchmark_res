@@ -1,0 +1,12 @@
+{"user_id":"u1","parent_asin":"i1","timestamp":1,"rating":5}
+{"user_id":"u1","parent_asin":"i2","timestamp":2,"rating":4}
+{"user_id":"u1","parent_asin":"i3","timestamp":3,"rating":5}
+{"user_id":"u1","parent_asin":"i4","timestamp":4,"rating":5}
+{"user_id":"u1","parent_asin":"i5","timestamp":5,"rating":4}
+{"user_id":"u1","parent_asin":"i6","timestamp":6,"rating":5}
+{"reviewerID":"u2","asin":"i2","unixReviewTime":1,"overall":5}
+{"reviewerID":"u2","asin":"i3","unixReviewTime":2,"overall":5}
+{"reviewerID":"u2","asin":"i4","unixReviewTime":3,"overall":4}
+{"reviewerID":"u2","asin":"i5","unixReviewTime":4,"overall":5}
+{"reviewerID":"u2","asin":"i6","unixReviewTime":5,"overall":4}
+{"reviewerID":"u2","asin":"i1","unixReviewTime":6,"overall":5}
